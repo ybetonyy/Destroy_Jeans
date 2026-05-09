@@ -116,6 +116,29 @@ function Index() {
 
       <footer className="border-t border-border px-4 py-8 text-center text-xs text-muted-foreground">
         © 2025 Destroy Jeans. Archive Catalog.
+        {/* FOOTER */}
+<footer className="border-t border-border mt-20">
+  <div className="container mx-auto px-4 py-10 flex flex-col items-center gap-4 text-center">
+    <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-6 text-sm text-muted-foreground">
+      <a
+        href="tel:+5515991913942"
+        className="hover:text-foreground transition-colors"
+      >
+        📞 +55 15 99191-3942
+      </a>
+      <a
+        href="mailto:hikef005@gmail.com"
+        className="hover:text-foreground transition-colors"
+      >
+        ✉️ hikef005@gmail.com
+      </a>
+    </div>
+    <p className="text-xs text-muted-foreground">
+      © 2025 Destroy Jeans. Archive Catalog.
+    </p>
+  </div>
+</footer>
+
       </footer>
     </main>
   );
