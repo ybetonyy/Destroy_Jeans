@@ -16,7 +16,9 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProdutoSlugRouteImport } from './routes/produto.$slug'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated.admin'
+import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated.admin.index'
 import { Route as AuthenticatedContaPedidosRouteImport } from './routes/_authenticated.conta.pedidos'
+import { Route as AuthenticatedAdminPedidosRouteImport } from './routes/_authenticated.admin.pedidos'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -52,11 +54,22 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
 const AuthenticatedContaPedidosRoute =
   AuthenticatedContaPedidosRouteImport.update({
     id: '/conta/pedidos',
     path: '/conta/pedidos',
     getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedAdminPedidosRoute =
+  AuthenticatedAdminPedidosRouteImport.update({
+    id: '/pedidos',
+    path: '/pedidos',
+    getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -64,18 +77,21 @@ export interface FileRoutesByFullPath {
   '/cadastro': typeof CadastroRoute
   '/carrinho': typeof CarrinhoRoute
   '/login': typeof LoginRoute
-  '/admin': typeof AuthenticatedAdminRoute
+  '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/produto/$slug': typeof ProdutoSlugRoute
+  '/admin/pedidos': typeof AuthenticatedAdminPedidosRoute
   '/conta/pedidos': typeof AuthenticatedContaPedidosRoute
+  '/admin/': typeof AuthenticatedAdminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/cadastro': typeof CadastroRoute
   '/carrinho': typeof CarrinhoRoute
   '/login': typeof LoginRoute
-  '/admin': typeof AuthenticatedAdminRoute
   '/produto/$slug': typeof ProdutoSlugRoute
+  '/admin/pedidos': typeof AuthenticatedAdminPedidosRoute
   '/conta/pedidos': typeof AuthenticatedContaPedidosRoute
+  '/admin': typeof AuthenticatedAdminIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -84,9 +100,11 @@ export interface FileRoutesById {
   '/cadastro': typeof CadastroRoute
   '/carrinho': typeof CarrinhoRoute
   '/login': typeof LoginRoute
-  '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/produto/$slug': typeof ProdutoSlugRoute
+  '/_authenticated/admin/pedidos': typeof AuthenticatedAdminPedidosRoute
   '/_authenticated/conta/pedidos': typeof AuthenticatedContaPedidosRoute
+  '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -97,16 +115,19 @@ export interface FileRouteTypes {
     | '/login'
     | '/admin'
     | '/produto/$slug'
+    | '/admin/pedidos'
     | '/conta/pedidos'
+    | '/admin/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/cadastro'
     | '/carrinho'
     | '/login'
-    | '/admin'
     | '/produto/$slug'
+    | '/admin/pedidos'
     | '/conta/pedidos'
+    | '/admin'
   id:
     | '__root__'
     | '/'
@@ -116,7 +137,9 @@ export interface FileRouteTypes {
     | '/login'
     | '/_authenticated/admin'
     | '/produto/$slug'
+    | '/_authenticated/admin/pedidos'
     | '/_authenticated/conta/pedidos'
+    | '/_authenticated/admin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -179,6 +202,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/admin/': {
+      id: '/_authenticated/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/conta/pedidos': {
       id: '/_authenticated/conta/pedidos'
       path: '/conta/pedidos'
@@ -186,16 +216,36 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedContaPedidosRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/admin/pedidos': {
+      id: '/_authenticated/admin/pedidos'
+      path: '/pedidos'
+      fullPath: '/admin/pedidos'
+      preLoaderRoute: typeof AuthenticatedAdminPedidosRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
   }
 }
 
+interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminPedidosRoute: typeof AuthenticatedAdminPedidosRoute
+  AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
+}
+
+const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminPedidosRoute: AuthenticatedAdminPedidosRoute,
+  AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
+}
+
+const AuthenticatedAdminRouteWithChildren =
+  AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
+
 interface AuthenticatedRouteChildren {
-  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedContaPedidosRoute: typeof AuthenticatedContaPedidosRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
-  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedContaPedidosRoute: AuthenticatedContaPedidosRoute,
 }
 
