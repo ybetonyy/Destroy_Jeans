@@ -88,6 +88,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "Destroy Jeans — Archive Catalog" },
+      { name: "description", content: "Admin Charm is a website administration system for managing products, content, and user access." },
+      { property: "og:description", content: "Admin Charm is a website administration system for managing products, content, and user access." },
+      { name: "twitter:description", content: "Admin Charm is a website administration system for managing products, content, and user access." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/21118a3c-7d0f-4fe3-bba0-1ee81b143a09/id-preview-1b83f237--fdd44576-4599-4f84-910a-26dc57604874.lovable.app-1778350038938.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/21118a3c-7d0f-4fe3-bba0-1ee81b143a09/id-preview-1b83f237--fdd44576-4599-4f84-910a-26dc57604874.lovable.app-1778350038938.png" },
     ],
     links: [
       {
