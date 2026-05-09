@@ -8,7 +8,7 @@ import { formatBRL } from "@/lib/format";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 
-const WHATSAPP_NUMBER = "5511999999999"; // troque no admin/config
+const WHATSAPP_NUMBER = "5515991913942";
 
 export const Route = createFileRoute("/carrinho")({
   head: () => ({ meta: [{ title: "Carrinho — Destroy Jeans" }] }),
