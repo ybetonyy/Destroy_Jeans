@@ -45,6 +45,7 @@ export function ProductForm({ initial }: { initial?: ProductFormInitial }) {
     initial?.variants ?? [{ size: "P", stock: 0 }],
   );
   const [uploading, setUploading] = useState(false);
+  const [imageUrl, setImageUrl] = useState("");
 
   useEffect(() => {
     if (!isEdit && name && !slug) setSlug(slugify(name));
@@ -71,6 +72,33 @@ export function ProductForm({ initial }: { initial?: ProductFormInitial }) {
       }
     } finally {
       setUploading(false);
+    }
+  };
+
+  // Convert Google Drive share links to direct image URLs
+  const normalizeImageUrl = (raw: string): string => {
+    const url = raw.trim();
+    // https://drive.google.com/file/d/FILE_ID/view?usp=...
+    const m1 = url.match(/drive\.google\.com\/file\/d\/([^/]+)/);
+    if (m1) return `https://drive.google.com/uc?export=view&id=${m1[1]}`;
+    // https://drive.google.com/open?id=FILE_ID
+    const m2 = url.match(/[?&]id=([^&]+)/);
+    if (m2 && url.includes("drive.google.com")) {
+      return `https://drive.google.com/uc?export=view&id=${m2[1]}`;
+    }
+    return url;
+  };
+
+  const addImageByUrl = () => {
+    if (!imageUrl.trim()) return;
+    try {
+      const normalized = normalizeImageUrl(imageUrl);
+      // basic URL validation
+      new URL(normalized);
+      setImages((imgs) => [...imgs, { url: normalized, position: imgs.length }]);
+      setImageUrl("");
+    } catch {
+      toast.error("URL inválida");
     }
   };
 
@@ -209,6 +237,26 @@ export function ProductForm({ initial }: { initial?: ProductFormInitial }) {
           </label>
         </div>
         <p className="text-xs text-muted-foreground">JPG/PNG até 5MB cada. A primeira imagem é a capa.</p>
+
+        <div className="mt-2 flex gap-2">
+          <Input
+            placeholder="Cole URL (Google Drive, etc)"
+            value={imageUrl}
+            onChange={(e) => setImageUrl(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                addImageByUrl();
+              }
+            }}
+          />
+          <Button type="button" variant="outline" onClick={addImageByUrl}>
+            <Plus className="mr-1 h-3 w-3" /> URL
+          </Button>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          Para Google Drive: clique direito no arquivo → Compartilhar → "Qualquer pessoa com o link" e cole aqui.
+        </p>
       </div>
 
       {/* VARIANTS */}

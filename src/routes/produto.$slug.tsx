@@ -6,7 +6,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { formatBRL } from "@/lib/format";
 import { useCart } from "@/store/cart";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, MessageCircle } from "lucide-react";
+
+const WHATSAPP_NUMBER = "5515991913942";
 
 export const Route = createFileRoute("/produto/$slug")({
   component: ProductPage,
@@ -152,6 +154,24 @@ function ProductPage() {
             className="mt-8 w-full shadow-glow"
           >
             {canAdd ? "Adicionar ao carrinho" : current ? "Esgotado" : "Selecione um tamanho"}
+          </Button>
+
+          <Button
+            asChild
+            variant="outline"
+            size="lg"
+            className="mt-3 w-full"
+          >
+            <a
+              href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+                `Olá! Tenho interesse no produto *${data.name}*${current ? ` (Tam ${current.size})` : ""} — ${formatBRL(data.price_cents)}\n${typeof window !== "undefined" ? window.location.href : ""}`,
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <MessageCircle className="mr-2 h-5 w-5" />
+              Comprar via WhatsApp
+            </a>
           </Button>
         </div>
       </div>
