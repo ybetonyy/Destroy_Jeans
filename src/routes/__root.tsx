@@ -133,6 +133,17 @@ function RootComponent() {
         <div className="relative min-h-screen bg-grid">
           <Header />
           <Outlet />
+          <footer className="mt-20 border-t border-border py-6 text-center text-xs text-muted-foreground">
+            criador:{" "}
+            <a
+              href="https://instagram.com/tony_ybe"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              tony_ybe IG
+            </a>
+          </footer>
           <Toaster />
         </div>
       </AuthProvider>
