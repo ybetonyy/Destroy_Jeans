@@ -6,7 +6,7 @@ import { Plus, Pencil, Trash2, Eye, EyeOff } from "lucide-react";
 import { formatBRL } from "@/lib/format";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/_authenticated/admin/produtos")({
+export const Route = createFileRoute("/_authenticated/admin/produtos/")({
   head: () => ({ meta: [{ title: "Produtos — Admin" }] }),
   component: ProductList,
 });
