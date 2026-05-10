@@ -2,15 +2,17 @@ import { createFileRoute, Link, Outlet, redirect, useRouterState } from "@tansta
 import { supabase } from "@/integrations/supabase/client";
 import { LayoutDashboard, Package, ShoppingCart } from "lucide-react";
 
+const ADMIN_EMAILS = ["faustoplaystationfafatube@gmail.com", "hikef005@gmail.com"];
+
 export const Route = createFileRoute("/_authenticated/admin")({
-   beforeLoad: async () => {
+  beforeLoad: async () => {
     const { data: { session } } = await supabase.auth.getSession();
+
     if (!session) throw redirect({ to: "/login" });
 
-    // Lista de e-mails autorizados
-    const admins = ["faustoplaystationfafatube@gmail.com", "hikef005@gmail.com"];
-    
-    if (!admins.includes(session.user.email || "")) {
+    const email = session.user.email?.toLowerCase().trim() ?? "";
+
+    if (!ADMIN_EMAILS.includes(email)) {
       throw redirect({ to: "/" });
     }
   },
@@ -19,6 +21,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
 
 function AdminLayout() {
   const path = useRouterState({ select: (s) => s.location.pathname });
+
   const items = [
     { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
     { to: "/admin/produtos", label: "Produtos", icon: Package, exact: false },
@@ -50,7 +53,9 @@ function AdminLayout() {
             );
           })}
         </nav>
-        <div><Outlet /></div>
+        <div>
+          <Outlet />
+        </div>
       </div>
     </div>
   );
