@@ -4,15 +4,16 @@ import { useAuth } from "@/hooks/use-auth";
 import { useCart } from "@/store/cart";
 import { Button } from "@/components/ui/button";
 
+const ADMIN_EMAILS = ["faustoplaystationfafatube@gmail.com", "hikef005@gmail.com"];
+
 export function Header() {
-  const { user, signOut } = useAuth();
+  const { user, signOut, loading } = useAuth();
   const count = useCart((s) => s.count());
   const navigate = useNavigate();
 
-  // Verificação manual de admin por e-mail
- const admins = ["faustoplaystationfafatube@gmail.com", "hikef005@gmail.com"];
-const isUserAdmin = !!(user?.email && admins.includes(user.email.toLowerCase().trim()));
-
+  const isUserAdmin = !loading && !!(
+    user?.email && ADMIN_EMAILS.includes(user.email.toLowerCase().trim())
+  );
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
@@ -21,7 +22,6 @@ const isUserAdmin = !!(user?.email && admins.includes(user.email.toLowerCase().t
           <span className="font-serif text-lg sm:text-2xl font-bold text-primary text-glow">DESTROY</span>
           <span className="font-serif text-lg sm:text-2xl font-bold text-foreground">JEANS</span>
         </Link>
-
         <nav className="hidden items-center gap-6 md:flex">
           <Link
             to="/"
@@ -41,7 +41,6 @@ const isUserAdmin = !!(user?.email && admins.includes(user.email.toLowerCase().t
             </Link>
           )}
         </nav>
-
         <div className="flex shrink-0 items-center gap-1 sm:gap-2">
           <Button asChild variant="ghost" size="icon" className="relative">
             <Link to="/carrinho" aria-label="Carrinho">
@@ -53,7 +52,6 @@ const isUserAdmin = !!(user?.email && admins.includes(user.email.toLowerCase().t
               )}
             </Link>
           </Button>
-
           {user ? (
             <>
               <Button asChild variant="ghost" size="icon">
