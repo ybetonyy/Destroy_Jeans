@@ -18,6 +18,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  // CORREÇÃO: Recebe o email direto para não quebrar o site
   const checkRole = async (userId: string | undefined, userEmail?: string) => {
     if (!userId) {
       setIsAdmin(false);
