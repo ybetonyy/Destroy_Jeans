@@ -10,8 +10,9 @@ export function Header() {
   const navigate = useNavigate();
 
   // Verificação manual de admin por e-mail
-  const admins = ["faustoplaystationfafatube@gmail.com", "hikef005@gmail.com"];
-  const isUserAdmin = user && admins.includes(user.email || "");
+ const admins = ["faustoplaystationfafatube@gmail.com", "hikef005@gmail.com"];
+const isUserAdmin = !!(user?.email && admins.includes(user.email.toLowerCase().trim()));
+
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
