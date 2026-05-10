@@ -11,10 +11,10 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        <Link to="/" className="flex items-baseline gap-2">
-          <span className="font-serif text-2xl font-bold text-primary text-glow">DESTROY</span>
-          <span className="font-serif text-2xl font-bold text-foreground">JEANS</span>
+      <div className="container mx-auto flex h-16 items-center justify-between gap-2 px-3 sm:px-4">
+        <Link to="/" className="flex items-baseline gap-1 sm:gap-2 min-w-0 shrink">
+          <span className="font-serif text-lg sm:text-2xl font-bold text-primary text-glow">DESTROY</span>
+          <span className="font-serif text-lg sm:text-2xl font-bold text-foreground">JEANS</span>
         </Link>
 
         <nav className="hidden items-center gap-6 md:flex">
@@ -37,7 +37,7 @@ export function Header() {
           )}
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-1 sm:gap-2">
           <Button asChild variant="ghost" size="icon" className="relative">
             <Link to="/carrinho" aria-label="Carrinho">
               <ShoppingBag className="h-5 w-5" />
@@ -70,10 +70,10 @@ export function Header() {
             </>
           ) : (
             <>
-              <Button asChild variant="ghost" size="sm">
+              <Button asChild variant="ghost" size="sm" className="px-2 sm:px-3">
                 <Link to="/login">Entrar</Link>
               </Button>
-              <Button asChild variant="default" size="sm" className="shadow-glow">
+              <Button asChild variant="default" size="sm" className="px-2 sm:px-3 shadow-glow">
                 <Link to="/cadastro">Cadastrar</Link>
               </Button>
             </>
