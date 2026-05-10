@@ -12,9 +12,12 @@ function MyOrders() {
   const { data, isLoading } = useQuery({
     queryKey: ["my-orders"],
     queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
       const { data, error } = await supabase
         .from("orders")
         .select("id, total_cents, status, created_at, order_items(product_name, size, quantity, unit_price_cents)")
+        .eq("user_id", user.id)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
