@@ -5,9 +5,13 @@ import { useCart } from "@/store/cart";
 import { Button } from "@/components/ui/button";
 
 export function Header() {
-  const { user, isAdmin, signOut } = useAuth();
+  const { user, signOut } = useAuth();
   const count = useCart((s) => s.count());
   const navigate = useNavigate();
+
+  // Verificação manual de admin por e-mail
+  const admins = ["faustoplaystationfafatube@gmail.com", "hikef005@gmail.com"];
+  const isUserAdmin = user && admins.includes(user.email || "");
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
@@ -26,16 +30,16 @@ export function Header() {
           >
             Catálogo
           </Link>
-          {user && ["faustoplaystationfafatube@gmail.com", "hikef005@gmail.com"].includes(user.email || "") && (
-  <Link
-    to="/admin"
-    className="flex items-center gap-1 text-sm uppercase tracking-widest text-muted-foreground hover:text-primary"
-    activeProps={{ className: "text-primary" }}
-  >
-    <LayoutDashboard className="h-4 w-4" /> Admin
-  </Link>
-)}
-
+          {isUserAdmin && (
+            <Link
+              to="/admin"
+              className="flex items-center gap-1 text-sm uppercase tracking-widest text-muted-foreground hover:text-primary"
+              activeProps={{ className: "text-primary" }}
+            >
+              <LayoutDashboard className="h-4 w-4" /> Admin
+            </Link>
+          )}
+        </nav>
 
         <div className="flex shrink-0 items-center gap-1 sm:gap-2">
           <Button asChild variant="ghost" size="icon" className="relative">
