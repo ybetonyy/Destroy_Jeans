@@ -18,19 +18,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const checkRole = async (userId: string | undefined) => {
+   const checkRole = async (userId: string | undefined) => {
     if (!userId) {
       setIsAdmin(false);
       return;
     }
-    const { data } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userId)
-      .eq("role", "admin")
-      .maybeSingle();
-    setIsAdmin(!!data);
+
+    // Lista de e-mails autorizados (você e seu cliente)
+    const admins = ["faustoplaystationfafatube@gmail.com", "hikef005@gmail.com"];
+    
+    // Pega o e-mail da sessão atual e limpa espaços/letras grandes
+    const userEmail = session?.user?.email?.toLowerCase().trim();
+    
+    // Se o e-mail estiver na lista, o botão ADMIN aparece na hora
+    if (userEmail && admins.includes(userEmail)) {
+      setIsAdmin(true);
+    } else {
+      // Caso contrário, ele ainda tenta checar o banco por segurança
+      const { data } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .eq("role", "admin")
+        .maybeSingle();
+      setIsAdmin(!!data);
+    }
   };
+
 
   useEffect(() => {
     // Listener FIRST
