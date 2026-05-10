@@ -7,21 +7,15 @@ const ADMIN_EMAILS = ["faustoplaystationfafatube@gmail.com", "hikef005@gmail.com
 export const Route = createFileRoute("/_authenticated/admin")({
   beforeLoad: async () => {
     const { data: { session } } = await supabase.auth.getSession();
-
     if (!session) throw redirect({ to: "/login" });
-
     const email = session.user.email?.toLowerCase().trim() ?? "";
-
-    if (!ADMIN_EMAILS.includes(email)) {
-      throw redirect({ to: "/" });
-    }
+    if (!ADMIN_EMAILS.includes(email)) throw redirect({ to: "/" });
   },
   component: AdminLayout,
 });
 
 function AdminLayout() {
   const path = useRouterState({ select: (s) => s.location.pathname });
-
   const items = [
     { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
     { to: "/admin/produtos", label: "Produtos", icon: Package, exact: false },
@@ -53,9 +47,7 @@ function AdminLayout() {
             );
           })}
         </nav>
-        <div>
-          <Outlet />
-        </div>
+        <div><Outlet /></div>
       </div>
     </div>
   );
