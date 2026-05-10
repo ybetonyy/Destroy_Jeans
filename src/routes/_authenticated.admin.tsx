@@ -3,16 +3,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { LayoutDashboard, Package, ShoppingCart } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin")({
-  beforeLoad: async () => {
+   beforeLoad: async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) throw redirect({ to: "/login" });
-    const { data } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", session.user.id)
-      .eq("role", "admin")
-      .maybeSingle();
-    if (!data) throw redirect({ to: "/" });
+
+    // Lista de e-mails autorizados
+    const admins = ["faustoplaystationfafatube@gmail.com", "hikef005@gmail.com"];
+    
+    if (!admins.includes(session.user.email || "")) {
+      throw redirect({ to: "/" });
+    }
   },
   component: AdminLayout,
 });
