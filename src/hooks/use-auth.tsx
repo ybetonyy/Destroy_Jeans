@@ -18,23 +18,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
-   const checkRole = async (userId: string | undefined) => {
+  const checkRole = async (userId: string | undefined, userEmail?: string) => {
     if (!userId) {
       setIsAdmin(false);
       return;
     }
 
-    // Lista de e-mails autorizados (você e seu cliente)
     const admins = ["faustoplaystationfafatube@gmail.com", "hikef005@gmail.com"];
+    const cleanEmail = userEmail?.toLowerCase().trim();
     
-    // Pega o e-mail da sessão atual e limpa espaços/letras grandes
-    const userEmail = session?.user?.email?.toLowerCase().trim();
-    
-    // Se o e-mail estiver na lista, o botão ADMIN aparece na hora
-    if (userEmail && admins.includes(userEmail)) {
+    if (cleanEmail && admins.includes(cleanEmail)) {
       setIsAdmin(true);
     } else {
-      // Caso contrário, ele ainda tenta checar o banco por segurança
       const { data } = await supabase
         .from("user_roles")
         .select("role")
@@ -45,18 +40,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-
   useEffect(() => {
-    // Listener FIRST
     const { data: sub } = supabase.auth.onAuthStateChange((_event, newSession) => {
       setSession(newSession);
-      // Defer DB call to avoid deadlocks
-      setTimeout(() => checkRole(newSession?.user?.id), 0);
+      checkRole(newSession?.user?.id, newSession?.user?.email);
     });
 
     supabase.auth.getSession().then(({ data: { session: s } }) => {
       setSession(s);
-      checkRole(s?.user?.id).finally(() => setLoading(false));
+      checkRole(s?.user?.id, s?.user?.email).finally(() => setLoading(false));
     });
 
     return () => sub.subscription.unsubscribe();
@@ -64,10 +56,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     await supabase.auth.signOut();
+    setIsAdmin(false);
   };
 
   const refreshRole = async () => {
-    await checkRole(session?.user?.id);
+    await checkRole(session?.user?.id, session?.user?.email);
   };
 
   return (
