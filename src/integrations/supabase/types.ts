@@ -243,11 +243,6 @@ export type Database = {
         }
         Returns: boolean
       }
-      mark_order_whatsapp_sent: {
-        Args: { _order_id: string }
-        Returns: undefined
-      }
-      place_order: { Args: { items: Json }; Returns: string }
     }
     Enums: {
       app_role: "admin" | "customer"
