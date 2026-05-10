@@ -26,16 +26,16 @@ export function Header() {
           >
             Catálogo
           </Link>
-          {isAdmin && (
-            <Link
-              to="/admin"
-              className="flex items-center gap-1 text-sm uppercase tracking-widest text-muted-foreground hover:text-primary"
-              activeProps={{ className: "text-primary" }}
-            >
-              <LayoutDashboard className="h-4 w-4" /> Admin
-            </Link>
-          )}
-        </nav>
+          {user && ["faustoplaystationfafatube@gmail.com", "hikef005@gmail.com"].includes(user.email || "") && (
+  <Link
+    to="/admin"
+    className="flex items-center gap-1 text-sm uppercase tracking-widest text-muted-foreground hover:text-primary"
+    activeProps={{ className: "text-primary" }}
+  >
+    <LayoutDashboard className="h-4 w-4" /> Admin
+  </Link>
+)}
+
 
         <div className="flex shrink-0 items-center gap-1 sm:gap-2">
           <Button asChild variant="ghost" size="icon" className="relative">
