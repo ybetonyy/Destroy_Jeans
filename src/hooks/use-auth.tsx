@@ -18,7 +18,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // CORREÇÃO: Recebe o email direto para não quebrar o site
+  // CORREÇÃO: Recebe o email como parâmetro para evitar o erro de "undefined"
   const checkRole = async (userId: string | undefined, userEmail?: string) => {
     if (!userId) {
       setIsAdmin(false);
@@ -44,6 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((_event, newSession) => {
       setSession(newSession);
+      // Passa o email direto da nova sessão
       checkRole(newSession?.user?.id, newSession?.user?.email);
     });
 
