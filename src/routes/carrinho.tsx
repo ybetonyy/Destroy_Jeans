@@ -1,12 +1,9 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Trash2, Minus, Plus, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useCart } from "@/store/cart";
-import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { formatBRL } from "@/lib/format";
-import { supabase } from "@/integrations/supabase/client";
-import { useState } from "react";
 
 const WHATSAPP_NUMBER = "5515991913942";
 
@@ -21,47 +18,22 @@ function CartPage() {
   const remove = useCart((s) => s.remove);
   const clear = useCart((s) => s.clear);
   const total = useCart((s) => s.totalCents());
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  const [submitting, setSubmitting] = useState(false);
 
-  const checkout = async () => {
-    if (!user) {
-      toast.error("Faça login para finalizar");
-      navigate({ to: "/login" });
-      return;
-    }
+  const checkout = () => {
     if (items.length === 0) return;
-
-    setSubmitting(true);
-    const { data, error } = await supabase.rpc("place_order", {
-      items: items.map((i) => ({ variant_id: i.variantId, quantity: i.quantity })),
-    });
-    if (error) {
-      setSubmitting(false);
-      toast.error(error.message);
-      return;
-    }
-
-    const orderId = data as string;
     const lines = items.map(
       (i) => `• ${i.productName} (Tam ${i.size}) x${i.quantity} — ${formatBRL(i.unitPriceCents * i.quantity)}`,
     );
     const msg = [
       `*Novo pedido — Destroy Jeans*`,
-      `Pedido: ${orderId.slice(0, 8)}`,
       ``,
       ...lines,
       ``,
       `*Total: ${formatBRL(total)}*`,
     ].join("\n");
-
-    await supabase.rpc("mark_order_whatsapp_sent", { _order_id: orderId });
-    clear();
-    setSubmitting(false);
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, "_blank");
-    toast.success("Pedido criado! Redirecionando ao WhatsApp...");
-    navigate({ to: "/conta/pedidos" });
+    toast.success("Redirecionando ao WhatsApp...");
+    clear();
   };
 
   return (
@@ -130,18 +102,12 @@ function CartPage() {
             </div>
             <Button
               onClick={checkout}
-              disabled={submitting}
               size="lg"
               className="mt-6 w-full shadow-glow"
             >
               <MessageCircle className="mr-2 h-5 w-5" />
-              {submitting ? "Processando..." : "Finalizar via WhatsApp"}
+              Finalizar via WhatsApp
             </Button>
-            {!user && (
-              <p className="mt-3 text-center text-xs text-muted-foreground">
-                É necessário <Link to="/login" className="text-primary underline">entrar</Link> para finalizar.
-              </p>
-            )}
           </div>
         </>
       )}
