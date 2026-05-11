@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { isAllowedAdminEmail } from "@/lib/admin";
 
 type AuthCtx = {
   user: User | null;
@@ -25,10 +26,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    const admins = ["faustoplaystationfafatube@gmail.com", "hikef005@gmail.com"];
-    const cleanEmail = userEmail?.toLowerCase().trim();
-    
-    if (cleanEmail && admins.includes(cleanEmail)) {
+    if (isAllowedAdminEmail(userEmail)) {
       setIsAdmin(true);
     } else {
       const { data } = await supabase
