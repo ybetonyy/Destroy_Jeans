@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
@@ -46,6 +46,8 @@ export function ProductForm({ initial }: { initial?: ProductFormInitial }) {
   );
   const [uploading, setUploading] = useState(false);
   const [imageUrl, setImageUrl] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!isEdit && name && !slug) setSlug(slugify(name));
@@ -224,17 +226,44 @@ export function ProductForm({ initial }: { initial?: ProductFormInitial }) {
               </button>
             </div>
           ))}
-          <label className="flex aspect-[3/4] cursor-pointer flex-col items-center justify-center gap-1 border border-dashed border-border bg-muted text-xs text-muted-foreground hover:border-primary hover:text-primary">
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="flex aspect-[3/4] cursor-pointer flex-col items-center justify-center gap-1 border border-dashed border-border bg-muted text-xs text-muted-foreground hover:border-primary hover:text-primary"
+          >
             <Upload className="h-5 w-5" />
-            {uploading ? "Enviando..." : "Adicionar"}
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              className="hidden"
-              onChange={(e) => handleUpload(e.target.files)}
-            />
-          </label>
+            <span>{uploading ? "Enviando..." : "Galeria"}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => cameraInputRef.current?.click()}
+            className="flex aspect-[3/4] cursor-pointer flex-col items-center justify-center gap-1 border border-dashed border-border bg-muted text-xs text-muted-foreground hover:border-primary hover:text-primary sm:hidden"
+          >
+            <Upload className="h-5 w-5" />
+            <span>Câmera</span>
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            className="sr-only"
+            onChange={(e) => {
+              handleUpload(e.target.files);
+              e.target.value = "";
+            }}
+          />
+          <input
+            ref={cameraInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            className="sr-only"
+            onChange={(e) => {
+              handleUpload(e.target.files);
+              e.target.value = "";
+            }}
+          />
         </div>
         <p className="text-xs text-muted-foreground">JPG/PNG até 5MB cada. A primeira imagem é a capa.</p>
 
