@@ -62,15 +62,34 @@ export function ProductForm({ initial }: { initial?: ProductFormInitial }) {
           toast.error(`${file.name}: máximo 5MB`);
           continue;
         }
-        const ext = file.name.split(".").pop() ?? "jpg";
+        // iPhone HEIC/HEIF não é exibido pelos navegadores — bloquear com mensagem clara
+        const lowerName = file.name.toLowerCase();
+        if (
+          file.type === "image/heic" ||
+          file.type === "image/heif" ||
+          lowerName.endsWith(".heic") ||
+          lowerName.endsWith(".heif")
+        ) {
+          toast.error(
+            `${file.name}: formato HEIC não suportado. No iPhone, vá em Ajustes → Câmera → Formatos → "Mais Compatível" e tente novamente.`,
+          );
+          continue;
+        }
+        const rawExt = (lowerName.split(".").pop() || "jpg").replace(/[^a-z0-9]/g, "");
+        const ext = rawExt && rawExt.length <= 5 ? rawExt : "jpg";
         const path = `${crypto.randomUUID()}.${ext}`;
-        const { error } = await supabase.storage.from("product-images").upload(path, file);
+        const contentType = file.type || "image/jpeg";
+        const { error } = await supabase.storage
+          .from("product-images")
+          .upload(path, file, { contentType, upsert: false });
         if (error) {
-          toast.error(error.message);
+          console.error("upload error", error);
+          toast.error(`Falha no upload: ${error.message}`);
           continue;
         }
         const { data } = supabase.storage.from("product-images").getPublicUrl(path);
         setImages((imgs) => [...imgs, { url: data.publicUrl, position: imgs.length }]);
+        toast.success(`${file.name} enviada`);
       }
     } finally {
       setUploading(false);
@@ -80,14 +99,16 @@ export function ProductForm({ initial }: { initial?: ProductFormInitial }) {
   // Convert Google Drive share links to direct image URLs
   const normalizeImageUrl = (raw: string): string => {
     const url = raw.trim();
+    // O endpoint /uc?export=view foi bloqueado pelo Google p/ hotlink — usar thumbnail
     // https://drive.google.com/file/d/FILE_ID/view?usp=...
-    const m1 = url.match(/drive\.google\.com\/file\/d\/([^/]+)/);
-    if (m1) return `https://drive.google.com/uc?export=view&id=${m1[1]}`;
-    // https://drive.google.com/open?id=FILE_ID
+    const m1 = url.match(/drive\.google\.com\/file\/d\/([^/?#]+)/);
+    if (m1) return `https://drive.google.com/thumbnail?id=${m1[1]}&sz=w2000`;
+    // https://drive.google.com/open?id=FILE_ID  ou  ?id=FILE_ID
     const m2 = url.match(/[?&]id=([^&]+)/);
     if (m2 && url.includes("drive.google.com")) {
-      return `https://drive.google.com/uc?export=view&id=${m2[1]}`;
+      return `https://drive.google.com/thumbnail?id=${m2[1]}&sz=w2000`;
     }
+    // https://lh3.googleusercontent.com/... já funciona direto
     return url;
   };
 
@@ -215,7 +236,12 @@ export function ProductForm({ initial }: { initial?: ProductFormInitial }) {
         <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
           {images.map((img, i) => (
             <div key={img.url} className="group relative aspect-[3/4] overflow-hidden border border-border bg-muted">
-              <img src={img.url} alt="" className="h-full w-full object-cover" />
+              <img
+                src={img.url}
+                alt=""
+                className="h-full w-full object-cover"
+                onError={() => toast.error("Não foi possível carregar a imagem (URL inválida ou bloqueada)")}
+              />
               <button
                 type="button"
                 onClick={() => setImages((arr) => arr.filter((_, idx) => idx !== i))}
