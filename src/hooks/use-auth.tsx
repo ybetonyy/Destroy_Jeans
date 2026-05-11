@@ -1,7 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import { isAllowedAdminEmail } from "@/lib/admin";
 
 type AuthCtx = {
   user: User | null;
@@ -19,36 +18,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // CORREÇÃO: Recebe o email como parâmetro para evitar o erro de "undefined"
-  const checkRole = async (userId: string | undefined, userEmail?: string) => {
+  const checkRole = async (userId: string | undefined) => {
     if (!userId) {
       setIsAdmin(false);
       return;
     }
 
-    if (isAllowedAdminEmail(userEmail)) {
-      setIsAdmin(true);
-    } else {
-      const { data } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", userId)
-        .eq("role", "admin")
-        .maybeSingle();
-      setIsAdmin(!!data);
-    }
+    const { data } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId)
+      .eq("role", "admin")
+      .maybeSingle();
+    setIsAdmin(!!data);
   };
 
   useEffect(() => {
     const { data: sub } = supabase.auth.onAuthStateChange((_event, newSession) => {
       setSession(newSession);
-      // Passa o email direto da nova sessão
-      checkRole(newSession?.user?.id, newSession?.user?.email);
+      checkRole(newSession?.user?.id);
     });
 
     supabase.auth.getSession().then(({ data: { session: s } }) => {
       setSession(s);
-      checkRole(s?.user?.id, s?.user?.email).finally(() => setLoading(false));
+      checkRole(s?.user?.id).finally(() => setLoading(false));
     });
 
     return () => sub.subscription.unsubscribe();
@@ -60,7 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const refreshRole = async () => {
-    await checkRole(session?.user?.id, session?.user?.email);
+    await checkRole(session?.user?.id);
   };
 
   return (
