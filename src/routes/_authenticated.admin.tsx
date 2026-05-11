@@ -1,15 +1,13 @@
 import { createFileRoute, Link, Outlet, redirect, useRouterState } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { LayoutDashboard, Package, ShoppingCart } from "lucide-react";
-
-const ADMIN_EMAILS = ["faustoplaystationfafatube@gmail.com", "hikef005@gmail.com"];
+import { isAllowedAdminEmail } from "@/lib/admin";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   beforeLoad: async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) throw redirect({ to: "/login" });
-    const email = session.user.email?.toLowerCase().trim() ?? "";
-    if (!ADMIN_EMAILS.includes(email)) throw redirect({ to: "/" });
+    if (!isAllowedAdminEmail(session.user.email)) throw redirect({ to: "/" });
   },
   component: AdminLayout,
 });
