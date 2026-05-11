@@ -18,7 +18,7 @@ export type ProductFormInitial = {
   description?: string;
   priceBRL?: string;
   active?: boolean;
-  images?: { id?: string; url: string; position: number }[];
+  images?: { id?: string; url: string; position: number; previewUrl?: string }[];
   variants?: { id?: string; size: string; stock: number }[];
 };
 
@@ -29,6 +29,25 @@ const schema = z.object({
   priceCents: z.number().int().min(0).max(10_000_000),
   active: z.boolean(),
 });
+
+const MAX_IMAGE_SIZE = 20 * 1024 * 1024;
+
+const mimeByExt: Record<string, string> = {
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  png: "image/png",
+  webp: "image/webp",
+  gif: "image/gif",
+};
+
+function createUploadPath(file: File) {
+  const fallbackId = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  const id = typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : fallbackId;
+  const lowerName = file.name.toLowerCase();
+  const rawExt = (lowerName.split(".").pop() || "jpg").replace(/[^a-z0-9]/g, "");
+  const ext = rawExt in mimeByExt ? rawExt : "jpg";
+  return { path: `${id}.${ext}`, contentType: file.type || mimeByExt[ext] };
+}
 
 export function ProductForm({ initial }: { initial?: ProductFormInitial }) {
   const navigate = useNavigate();
@@ -58,8 +77,8 @@ export function ProductForm({ initial }: { initial?: ProductFormInitial }) {
     setUploading(true);
     try {
       for (const file of Array.from(files)) {
-        if (file.size > 5 * 1024 * 1024) {
-          toast.error(`${file.name}: máximo 5MB`);
+        if (file.size > MAX_IMAGE_SIZE) {
+          toast.error(`${file.name}: máximo 20MB`);
           continue;
         }
         // iPhone HEIC/HEIF não é exibido pelos navegadores — bloquear com mensagem clara
@@ -75,10 +94,7 @@ export function ProductForm({ initial }: { initial?: ProductFormInitial }) {
           );
           continue;
         }
-        const rawExt = (lowerName.split(".").pop() || "jpg").replace(/[^a-z0-9]/g, "");
-        const ext = rawExt && rawExt.length <= 5 ? rawExt : "jpg";
-        const path = `${crypto.randomUUID()}.${ext}`;
-        const contentType = file.type || "image/jpeg";
+        const { path, contentType } = createUploadPath(file);
         const { error } = await supabase.storage
           .from("product-images")
           .upload(path, file, { contentType, upsert: false });
@@ -88,7 +104,8 @@ export function ProductForm({ initial }: { initial?: ProductFormInitial }) {
           continue;
         }
         const { data } = supabase.storage.from("product-images").getPublicUrl(path);
-        setImages((imgs) => [...imgs, { url: data.publicUrl, position: imgs.length }]);
+        const previewUrl = URL.createObjectURL(file);
+        setImages((imgs) => [...imgs, { url: data.publicUrl, previewUrl, position: imgs.length }]);
         toast.success(`${file.name} enviada`);
       }
     } finally {
@@ -117,7 +134,8 @@ export function ProductForm({ initial }: { initial?: ProductFormInitial }) {
     try {
       const normalized = normalizeImageUrl(imageUrl);
       // basic URL validation
-      new URL(normalized);
+      const parsedUrl = new URL(normalized);
+      if (!/^https?:$/.test(parsedUrl.protocol)) throw new Error("unsupported protocol");
       setImages((imgs) => [...imgs, { url: normalized, position: imgs.length }]);
       setImageUrl("");
     } catch {
@@ -168,7 +186,8 @@ export function ProductForm({ initial }: { initial?: ProductFormInitial }) {
       }
 
       // Replace images
-      await supabase.from("product_images").delete().eq("product_id", productId);
+      const { error: deleteImagesError } = await supabase.from("product_images").delete().eq("product_id", productId);
+      if (deleteImagesError) throw deleteImagesError;
       if (images.length > 0) {
         const { error } = await supabase.from("product_images").insert(
           images.map((img, i) => ({ product_id: productId!, url: img.url, position: i })),
@@ -177,7 +196,8 @@ export function ProductForm({ initial }: { initial?: ProductFormInitial }) {
       }
 
       // Replace variants
-      await supabase.from("product_variants").delete().eq("product_id", productId);
+      const { error: deleteVariantsError } = await supabase.from("product_variants").delete().eq("product_id", productId);
+      if (deleteVariantsError) throw deleteVariantsError;
       const { error: vErr } = await supabase.from("product_variants").insert(
         variants.map((v) => ({
           product_id: productId!,
@@ -237,7 +257,7 @@ export function ProductForm({ initial }: { initial?: ProductFormInitial }) {
           {images.map((img, i) => (
             <div key={img.url} className="group relative aspect-[3/4] overflow-hidden border border-border bg-muted">
               <img
-                src={img.url}
+                src={img.previewUrl ?? img.url}
                 alt=""
                 className="h-full w-full object-cover"
                 onError={() => toast.error("Não foi possível carregar a imagem (URL inválida ou bloqueada)")}
