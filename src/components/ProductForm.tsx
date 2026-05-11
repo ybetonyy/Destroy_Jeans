@@ -257,7 +257,7 @@ export function ProductForm({ initial }: { initial?: ProductFormInitial }) {
           {images.map((img, i) => (
             <div key={img.url} className="group relative aspect-[3/4] overflow-hidden border border-border bg-muted">
               <img
-                src={img.url}
+                src={img.previewUrl ?? img.url}
                 alt=""
                 className="h-full w-full object-cover"
                 onError={() => toast.error("Não foi possível carregar a imagem (URL inválida ou bloqueada)")}
