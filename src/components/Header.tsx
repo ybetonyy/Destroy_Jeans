@@ -4,16 +4,10 @@ import { useAuth } from "@/hooks/use-auth";
 import { useCart } from "@/store/cart";
 import { Button } from "@/components/ui/button";
 
-const ADMIN_EMAILS = ["faustoplaystationfafatube@gmail.com", "hikef005@gmail.com"];
-
 export function Header() {
-  const { user, signOut, loading } = useAuth();
+  const { user, signOut, isAdmin } = useAuth();
   const count = useCart((s) => s.count());
   const navigate = useNavigate();
-
-  const isUserAdmin = !loading && !!(
-    user?.email && ADMIN_EMAILS.includes(user.email.toLowerCase().trim())
-  );
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
@@ -31,7 +25,7 @@ export function Header() {
           >
             Catálogo
           </Link>
-          {isUserAdmin && (
+          {isAdmin && (
             <Link
               to="/admin"
               className="flex items-center gap-1 text-sm uppercase tracking-widest text-muted-foreground hover:text-primary"
@@ -54,6 +48,13 @@ export function Header() {
           </Button>
           {user ? (
             <>
+              {isAdmin && (
+                <Button asChild variant="ghost" size="icon" className="md:hidden">
+                  <Link to="/admin" aria-label="Admin">
+                    <LayoutDashboard className="h-5 w-5" />
+                  </Link>
+                </Button>
+              )}
               <Button asChild variant="ghost" size="icon">
                 <Link to="/conta/pedidos" aria-label="Minha conta">
                   <User className="h-5 w-5" />
